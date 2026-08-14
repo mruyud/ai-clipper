@@ -8,6 +8,10 @@ workflows:
       java: 17
 
     scripts:
+
+      # =========================================================
+      # CREATE ANDROID PROJECT
+      # =========================================================
       - name: Create Android project
         script: |
           cat > settings.gradle.kts <<'EOF'
@@ -19,9 +23,18 @@ workflows:
               }
           }
 
+          dependencyResolutionManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
           rootProject.name = "AIClipper"
+
           include(":app")
           EOF
+
 
           cat > build.gradle.kts <<'EOF'
           plugins {
@@ -31,8 +44,10 @@ workflows:
           }
           EOF
 
+
           mkdir -p app/src/main/java/com/example/aiclipper
           mkdir -p app/src/main/res/values
+
 
           cat > app/build.gradle.kts <<'EOF'
           plugins {
@@ -45,6 +60,14 @@ workflows:
               namespace = "com.example.aiclipper"
               compileSdk = 35
 
+              defaultConfig {
+                  applicationId = "com.example.aiclipper"
+                  minSdk = 26
+                  targetSdk = 35
+                  versionCode = 10
+                  versionName = "10.0"
+              }
+
               buildFeatures {
                   compose = true
               }
@@ -53,30 +76,27 @@ workflows:
                   sourceCompatibility = JavaVersion.VERSION_17
                   targetCompatibility = JavaVersion.VERSION_17
               }
-
-              defaultConfig {
-                  applicationId = "com.example.aiclipper"
-                  minSdk = 26
-                  targetSdk = 35
-                  versionCode = 10
-                  versionName = "10.0"
-              }
           }
 
           dependencies {
+              implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
+
               implementation("androidx.core:core-ktx:1.15.0")
               implementation("androidx.activity:activity-compose:1.10.1")
+
               implementation("androidx.compose.ui:ui:1.7.8")
               implementation("androidx.compose.ui:ui-tooling-preview:1.7.8")
               implementation("androidx.compose.material3:material3:1.3.1")
           }
           EOF
 
+
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
               <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar" />
           </resources>
           EOF
+
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -104,6 +124,7 @@ workflows:
 
           </manifest>
           EOF
+
 
           cat > app/src/main/java/com/example/aiclipper/MainActivity.kt <<'EOF'
           package com.example.aiclipper
@@ -163,12 +184,10 @@ workflows:
               }
 
               MaterialTheme {
-
                   Surface(
                       modifier = Modifier.fillMaxSize(),
                       color = Bg
                   ) {
-
                       when (screen) {
 
                           0 -> Home {
@@ -253,7 +272,6 @@ workflows:
                           containerColor = Purple
                       )
                   ) {
-
                       Text(
                           text = "+  Pilih Video Podcast"
                       )
@@ -353,7 +371,6 @@ workflows:
                                       containerColor = Purple
                                   )
                               ) {
-
                                   Text(
                                       text = "Preview"
                                   )
@@ -443,7 +460,6 @@ workflows:
                           containerColor = Purple
                       )
                   ) {
-
                       Text(
                           text = "Simpan ke Galeri"
                       )
@@ -453,7 +469,6 @@ workflows:
                       onClick = back,
                       modifier = Modifier.fillMaxWidth()
                   ) {
-
                       Text(
                           text = "Kembali"
                       )
@@ -462,6 +477,10 @@ workflows:
           }
           EOF
 
+
+      # =========================================================
+      # INSTALL GRADLE
+      # =========================================================
       - name: Install Gradle
         script: |
           curl -L https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
@@ -469,10 +488,18 @@ workflows:
           export PATH="/tmp/gradle-8.7/bin:$PATH"
           gradle --version
 
+
+      # =========================================================
+      # BUILD APK
+      # =========================================================
       - name: Build APK
         script: |
           export PATH="/tmp/gradle-8.7/bin:$PATH"
           gradle assembleDebug --stacktrace
 
+
+    # =========================================================
+    # APK OUTPUT
+    # =========================================================
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
