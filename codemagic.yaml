@@ -1,0 +1,373 @@
+workflows:
+  android-debug:
+    name: AI Clipper Debug APK
+    max_build_duration: 60
+    instance_type: linux_x2
+
+    environment:
+      java: 17
+
+    scripts:
+      - name: Create Android project
+        script: |
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "AIClipper"
+          include(":app")
+          EOF
+
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.7.3" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+              id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+          }
+          EOF
+
+          mkdir -p app/src/main/java/com/example/aiclipper
+          mkdir -p app/src/main/res/values
+
+          cat > app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+              id("org.jetbrains.kotlin.plugin.compose")
+          }
+
+          android {
+              namespace = "com.example.aiclipper"
+              compileSdk = 35
+
+              defaultConfig {
+                  applicationId = "com.example.aiclipper"
+                  minSdk = 26
+                  targetSdk = 35
+                  versionCode = 10
+                  versionName = "10.0"
+              }
+          }
+
+          dependencies {
+              implementation("androidx.core:core-ktx:1.15.0")
+              implementation("androidx.activity:activity-compose:1.10.1")
+              implementation("androidx.compose.ui:ui:1.7.8")
+              implementation("androidx.compose.material3:material3:1.3.1")
+          }
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"/>
+          </resources>
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <application
+                  android:theme="@style/AppTheme"
+                  android:label="AI Clipper">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/java/com/example/aiclipper/MainActivity.kt <<'EOF'
+          package com.example.aiclipper
+
+          import android.os.Bundle
+          import androidx.activity.ComponentActivity
+          import androidx.activity.compose.setContent
+          import androidx.compose.foundation.background
+          import androidx.compose.foundation.layout.*
+          import androidx.compose.foundation.shape.RoundedCornerShape
+          import androidx.compose.material3.*
+          import androidx.compose.runtime.*
+          import androidx.compose.ui.Modifier
+          import androidx.compose.ui.graphics.Color
+          import androidx.compose.ui.text.font.FontWeight
+          import androidx.compose.ui.unit.dp
+
+          private val Bg = Color(0xFF080A12)
+          private val Card = Color(0xFF121522)
+          private val Purple = Color(0xFF7C3AED)
+          private val Muted = Color(0xFF9CA3AF)
+
+          @Composable
+          fun App() {
+              var screen by remember { mutableStateOf(0) }
+
+              MaterialTheme {
+                  Surface(
+                      modifier = Modifier.fillMaxSize(),
+                      color = Bg
+                  ) {
+                      when (screen) {
+                          0 -> Home { screen = 1 }
+                          1 -> Results { screen = 2 }
+                          2 -> Detail { screen = 1 }
+                      }
+                  }
+              }
+          }
+
+          @Composable
+          fun Home(next: () -> Unit) {
+              Column(
+                  modifier = Modifier
+                      .fillMaxSize()
+                      .padding(20.dp)
+              ) {
+                  Text(
+                      "AI Clipper",
+                      color = Color.White,
+                      style = MaterialTheme.typography.headlineLarge,
+                      fontWeight = FontWeight.Bold
+                  )
+
+                  Text(
+                      "PODCAST TO VIRAL CLIPS",
+                      color = Muted
+                  )
+
+                  Spacer(Modifier.height(28.dp))
+
+                  Card(
+                      colors = CardDefaults.cardColors(
+                          containerColor = Card
+                      ),
+                      shape = RoundedCornerShape(18.dp)
+                  ) {
+                      Column(Modifier.padding(20.dp)) {
+                          Text(
+                              "AI Semantic Clipper",
+                              color = Color.White,
+                              fontWeight = FontWeight.Bold
+                          )
+
+                          Spacer(Modifier.height(8.dp))
+
+                          Text(
+                              "Ubah podcast panjang menjadi clip terbaik.",
+                              color = Muted
+                          )
+                      }
+                  }
+
+                  Spacer(Modifier.height(18.dp))
+
+                  Button(
+                      onClick = next,
+                      modifier = Modifier.fillMaxWidth(),
+                      colors = ButtonDefaults.buttonColors(
+                          containerColor = Purple
+                      )
+                  ) {
+                      Text("+  Pilih Video Podcast")
+                  }
+
+                  Spacer(Modifier.height(25.dp))
+
+                  Feature("AI Semantic Engine")
+                  Feature("Top 10 Clip Ranking")
+                  Feature("Active Speaker Tracking")
+                  Feature("Auto 9:16 + Auto Zoom")
+                  Feature("Subtitle Otomatis")
+              }
+          }
+
+          @Composable
+          fun Feature(text: String) {
+              Text(
+                  "✓  $text",
+                  color = Color.White,
+                  modifier = Modifier.padding(vertical = 7.dp)
+              )
+          }
+
+          @Composable
+          fun Results(next: () -> Unit) {
+              Column(
+                  Modifier
+                      .fillMaxSize()
+                      .padding(18.dp)
+              ) {
+                  Text(
+                      "Hasil Top 10 Clip",
+                      color = Color.White,
+                      style = MaterialTheme.typography.headlineSmall,
+                      fontWeight = FontWeight.Bold
+                  )
+
+                  Text(
+                      "AI menemukan momen terbaik",
+                      color = Muted
+                  )
+
+                  Spacer(Modifier.height(18.dp))
+
+                  repeat(5) { i ->
+                      Card(
+                          Modifier
+                              .fillMaxWidth()
+                              .padding(bottom = 10.dp),
+                          colors = CardDefaults.cardColors(
+                              containerColor = Card
+                          )
+                      ) {
+                          Column(Modifier.padding(16.dp)) {
+                              Text(
+                                  "#${i + 1}   ${94 - i * 2}/100",
+                                  color = Color(0xFFA78BFA),
+                                  fontWeight = FontWeight.Bold
+                              )
+
+                              Text(
+                                  "Momen penting yang berpotensi viral...",
+                                  color = Color.White
+                              )
+
+                              Text(
+                                  "00:${45 - i * 2}",
+                                  color = Muted
+                              )
+
+                              Button(
+                                  onClick = next,
+                                  colors = ButtonDefaults.buttonColors(
+                                      containerColor = Purple
+                                  )
+                              ) {
+                                  Text("Preview")
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+
+          @Composable
+          fun Detail(back: () -> Unit) {
+              Column(
+                  Modifier
+                      .fillMaxSize()
+                      .padding(18.dp)
+              ) {
+                  Text(
+                      "Detail Clip",
+                      color = Color.White,
+                      style = MaterialTheme.typography.headlineSmall,
+                      fontWeight = FontWeight.Bold
+                  )
+
+                  Spacer(Modifier.height(15.dp))
+
+                  Box(
+                      Modifier
+                          .fillMaxWidth()
+                          .height(320.dp)
+                          .background(
+                              Color(0xFF1B1E2B),
+                              RoundedCornerShape(18.dp)
+                          )
+                  ) {
+                      Column(
+                          Modifier
+                              .fillMaxSize()
+                              .padding(20.dp),
+                          verticalArrangement = Arrangement.Center
+                      ) {
+                          Text(
+                              "▶",
+                              color = Color.White,
+                              style = MaterialTheme.typography.displayMedium
+                          )
+
+                          Text(
+                              "PREVIEW 9:16",
+                              color = Muted
+                          )
+                      }
+                  }
+
+                  Spacer(Modifier.height(18.dp))
+
+                  Text(
+                      "94/100 • VERY HIGH",
+                      color = Color(0xFFA78BFA),
+                      fontWeight = FontWeight.Bold
+                  )
+
+                  Text(
+                      "Momen ini berpotensi menjadi clip viral.",
+                      color = Color.White,
+                      style = MaterialTheme.typography.titleLarge
+                  )
+
+                  Spacer(Modifier.height(20.dp))
+
+                  Button(
+                      onClick = {},
+                      modifier = Modifier.fillMaxWidth(),
+                      colors = ButtonDefaults.buttonColors(
+                          containerColor = Purple
+                      )
+                  ) {
+                      Text("Simpan ke Galeri")
+                  }
+
+                  OutlinedButton(
+                      onClick = back,
+                      modifier = Modifier.fillMaxWidth()
+                  ) {
+                      Text("Kembali")
+                  }
+              }
+          }
+
+          class MainActivity : ComponentActivity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContent {
+                      App()
+                  }
+              }
+          }
+          EOF
+
+      - name: Install Gradle
+        script: |
+          curl -L https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          export PATH="/tmp/gradle-8.9/bin:$PATH"
+          gradle --version
+
+      - name: Build APK
+        script: |
+          export PATH="/tmp/gradle-8.9/bin:$PATH"
+          gradle assembleDebug
+
+    artifacts:
+      - app/build/outputs/apk/debug/app-debug.apk
