@@ -493,9 +493,32 @@ workflows:
       # BUILD APK
       # =========================================================
       - name: Build APK
-        script: |
-          export PATH="/tmp/gradle-8.7/bin:$PATH"
-          gradle assembleDebug --stacktrace
+  script: |
+    export PATH="/tmp/gradle-8.7/bin:$PATH"
+
+    set +e
+
+    gradle assembleDebug --stacktrace 2>&1 | tee /tmp/build.log
+
+    BUILD_STATUS=${PIPESTATUS[0]}
+
+    echo ""
+    echo "=========================================="
+    echo "===== RINGKASAN ERROR GRADLE ====="
+    echo "=========================================="
+
+    grep -E -A 8 -B 3 \
+      "What went wrong|Caused by:|Could not resolve|Could not find|Execution failed|error:" \
+      /tmp/build.log | tail -100 || true
+
+    echo "=========================================="
+    echo "===== STATUS BUILD: $BUILD_STATUS ====="
+    echo "=========================================="
+
+    exit $BUILD_STATUS
+        
+          
+          
 
 
     # =========================================================
