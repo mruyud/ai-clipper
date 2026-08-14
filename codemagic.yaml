@@ -365,9 +365,9 @@ workflows:
           gradle --version
 
       - name: Build APK
-        script: |
-          export PATH="/tmp/gradle-8.9/bin:$PATH"
-          gradle assembleDebug --stacktrace --info
+  script: |
+    export PATH="/tmp/gradle-8.9/bin:$PATH"
+    gradle assembleDebug --stacktrace --info
 
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
