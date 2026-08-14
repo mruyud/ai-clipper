@@ -19,25 +19,16 @@ workflows:
               }
           }
 
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-
           rootProject.name = "AIClipper"
           include(":app")
           EOF
 
           cat > build.gradle.kts <<'EOF'
           plugins {
-          id("com.android.application") version "8.5.2" apply false
-          id("org.jetbrains.kotlin.android") version "2.0.21" apply false
-          id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+              id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
           }
-          
           EOF
 
           mkdir -p app/src/main/java/com/example/aiclipper
@@ -49,28 +40,26 @@ workflows:
               id("org.jetbrains.kotlin.android")
               id("org.jetbrains.kotlin.plugin.compose")
           }
-          
+
           android {
-         namespace = "com.example.aiclipper"
-         compileSdk = 35
+              namespace = "com.example.aiclipper"
+              compileSdk = 35
 
-         buildFeatures {
-         compose = true
-         }
+              buildFeatures {
+                  compose = true
+              }
 
-         compileOptions {
-         sourceCompatibility = JavaVersion.VERSION_17
-         targetCompatibility = JavaVersion.VERSION_17
-         }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
 
-         defaultConfig {
-         applicationId = "com.example.aiclipper"
-         minSdk = 26
-         targetSdk = 35
-         versionCode = 10
-         versionName = "10.0"
-         }
-
+              defaultConfig {
+                  applicationId = "com.example.aiclipper"
+                  minSdk = 26
+                  targetSdk = 35
+                  versionCode = 10
+                  versionName = "10.0"
               }
           }
 
@@ -78,31 +67,41 @@ workflows:
               implementation("androidx.core:core-ktx:1.15.0")
               implementation("androidx.activity:activity-compose:1.10.1")
               implementation("androidx.compose.ui:ui:1.7.8")
+              implementation("androidx.compose.ui:ui-tooling-preview:1.7.8")
               implementation("androidx.compose.material3:material3:1.3.1")
           }
           EOF
 
           cat > app/src/main/res/values/styles.xml <<'EOF'
           <resources>
-              <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar"/>
+              <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar" />
           </resources>
           EOF
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET"/>
+
+              <uses-permission android:name="android.permission.INTERNET" />
+
               <application
                   android:theme="@style/AppTheme"
-                  android:label="AI Clipper">
+                  android:label="AI Clipper"
+                  android:allowBackup="true"
+                  android:supportsRtl="true">
+
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
+
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
+
                   </activity>
+
               </application>
+
           </manifest>
           EOF
 
@@ -113,82 +112,139 @@ workflows:
           import androidx.activity.ComponentActivity
           import androidx.activity.compose.setContent
           import androidx.compose.foundation.background
-          import androidx.compose.foundation.layout.*
+          import androidx.compose.foundation.layout.Arrangement
+          import androidx.compose.foundation.layout.Box
+          import androidx.compose.foundation.layout.Column
+          import androidx.compose.foundation.layout.Spacer
+          import androidx.compose.foundation.layout.fillMaxSize
+          import androidx.compose.foundation.layout.fillMaxWidth
+          import androidx.compose.foundation.layout.height
+          import androidx.compose.foundation.layout.padding
           import androidx.compose.foundation.shape.RoundedCornerShape
-          import androidx.compose.material3.*
-          import androidx.compose.runtime.*
+          import androidx.compose.material3.Button
+          import androidx.compose.material3.ButtonDefaults
+          import androidx.compose.material3.Card
+          import androidx.compose.material3.CardDefaults
+          import androidx.compose.material3.MaterialTheme
+          import androidx.compose.material3.OutlinedButton
+          import androidx.compose.material3.Surface
+          import androidx.compose.material3.Text
+          import androidx.compose.runtime.Composable
+          import androidx.compose.runtime.getValue
+          import androidx.compose.runtime.mutableStateOf
+          import androidx.compose.runtime.remember
+          import androidx.compose.runtime.setValue
           import androidx.compose.ui.Modifier
           import androidx.compose.ui.graphics.Color
           import androidx.compose.ui.text.font.FontWeight
           import androidx.compose.ui.unit.dp
 
           private val Bg = Color(0xFF080A12)
-          private val Card = Color(0xFF121522)
+          private val CardColor = Color(0xFF121522)
           private val Purple = Color(0xFF7C3AED)
           private val Muted = Color(0xFF9CA3AF)
 
+          class MainActivity : ComponentActivity() {
+
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+
+                  setContent {
+                      AIClipperApp()
+                  }
+              }
+          }
+
           @Composable
-          fun App() {
-              var screen by remember { mutableStateOf(0) }
+          fun AIClipperApp() {
+
+              var screen by remember {
+                  mutableStateOf(0)
+              }
 
               MaterialTheme {
+
                   Surface(
                       modifier = Modifier.fillMaxSize(),
                       color = Bg
                   ) {
+
                       when (screen) {
-                          0 -> Home { screen = 1 }
-                          1 -> Results { screen = 2 }
-                          2 -> Detail { screen = 1 }
+
+                          0 -> Home {
+                              screen = 1
+                          }
+
+                          1 -> Results {
+                              screen = 2
+                          }
+
+                          2 -> Detail {
+                              screen = 1
+                          }
                       }
                   }
               }
           }
 
           @Composable
-          fun Home(next: () -> Unit) {
+          fun Home(
+              next: () -> Unit
+          ) {
+
               Column(
                   modifier = Modifier
                       .fillMaxSize()
                       .padding(20.dp)
               ) {
+
                   Text(
-                      "AI Clipper",
+                      text = "AI Clipper",
                       color = Color.White,
                       style = MaterialTheme.typography.headlineLarge,
                       fontWeight = FontWeight.Bold
                   )
 
                   Text(
-                      "PODCAST TO VIRAL CLIPS",
+                      text = "PODCAST TO VIRAL CLIPS",
                       color = Muted
                   )
 
-                  Spacer(Modifier.height(28.dp))
+                  Spacer(
+                      modifier = Modifier.height(28.dp)
+                  )
 
                   Card(
                       colors = CardDefaults.cardColors(
-                          containerColor = Card
+                          containerColor = CardColor
                       ),
                       shape = RoundedCornerShape(18.dp)
                   ) {
-                      Column(Modifier.padding(20.dp)) {
+
+                      Column(
+                          modifier = Modifier.padding(20.dp)
+                      ) {
+
                           Text(
-                              "AI Semantic Clipper",
+                              text = "AI Semantic Clipper",
                               color = Color.White,
                               fontWeight = FontWeight.Bold
                           )
 
-                          Spacer(Modifier.height(8.dp))
+                          Spacer(
+                              modifier = Modifier.height(8.dp)
+                          )
 
                           Text(
-                              "Ubah podcast panjang menjadi clip terbaik.",
+                              text = "Ubah podcast panjang menjadi clip terbaik.",
                               color = Muted
                           )
                       }
                   }
 
-                  Spacer(Modifier.height(18.dp))
+                  Spacer(
+                      modifier = Modifier.height(18.dp)
+                  )
 
                   Button(
                       onClick = next,
@@ -197,10 +253,15 @@ workflows:
                           containerColor = Purple
                       )
                   ) {
-                      Text("+  Pilih Video Podcast")
+
+                      Text(
+                          text = "+  Pilih Video Podcast"
+                      )
                   }
 
-                  Spacer(Modifier.height(25.dp))
+                  Spacer(
+                      modifier = Modifier.height(25.dp)
+                  )
 
                   Feature("AI Semantic Engine")
                   Feature("Top 10 Clip Ranking")
@@ -211,59 +272,79 @@ workflows:
           }
 
           @Composable
-          fun Feature(text: String) {
+          fun Feature(
+              text: String
+          ) {
+
               Text(
-                  "✓  $text",
+                  text = "✓  $text",
                   color = Color.White,
-                  modifier = Modifier.padding(vertical = 7.dp)
+                  modifier = Modifier.padding(
+                      vertical = 7.dp
+                  )
               )
           }
 
           @Composable
-          fun Results(next: () -> Unit) {
+          fun Results(
+              next: () -> Unit
+          ) {
+
               Column(
-                  Modifier
+                  modifier = Modifier
                       .fillMaxSize()
                       .padding(18.dp)
               ) {
+
                   Text(
-                      "Hasil Top 10 Clip",
+                      text = "Hasil Top 10 Clip",
                       color = Color.White,
                       style = MaterialTheme.typography.headlineSmall,
                       fontWeight = FontWeight.Bold
                   )
 
                   Text(
-                      "AI menemukan momen terbaik",
+                      text = "AI menemukan momen terbaik",
                       color = Muted
                   )
 
-                  Spacer(Modifier.height(18.dp))
+                  Spacer(
+                      modifier = Modifier.height(18.dp)
+                  )
 
-                  repeat(5) { i ->
+                  repeat(5) { index ->
+
                       Card(
-                          Modifier
+                          modifier = Modifier
                               .fillMaxWidth()
                               .padding(bottom = 10.dp),
                           colors = CardDefaults.cardColors(
-                              containerColor = Card
+                              containerColor = CardColor
                           )
                       ) {
-                          Column(Modifier.padding(16.dp)) {
+
+                          Column(
+                              modifier = Modifier.padding(16.dp)
+                          ) {
+
                               Text(
-                                  "#${i + 1}   ${94 - i * 2}/100",
+                                  text = "#${index + 1}   ${94 - index * 2}/100",
                                   color = Color(0xFFA78BFA),
                                   fontWeight = FontWeight.Bold
                               )
 
                               Text(
-                                  "Momen penting yang berpotensi viral...",
+                                  text = "Momen penting yang berpotensi viral...",
                                   color = Color.White
                               )
 
                               Text(
-                                  "00:${45 - i * 2}",
+                                  text = "00:${45 - index * 2}",
                                   color = Muted
+                              )
+
+                              Spacer(
+                                  modifier = Modifier.height(8.dp)
                               )
 
                               Button(
@@ -272,7 +353,10 @@ workflows:
                                       containerColor = Purple
                                   )
                               ) {
-                                  Text("Preview")
+
+                                  Text(
+                                      text = "Preview"
+                                  )
                               }
                           }
                       }
@@ -281,64 +365,76 @@ workflows:
           }
 
           @Composable
-          fun Detail(back: () -> Unit) {
+          fun Detail(
+              back: () -> Unit
+          ) {
+
               Column(
-                  Modifier
+                  modifier = Modifier
                       .fillMaxSize()
                       .padding(18.dp)
               ) {
+
                   Text(
-                      "Detail Clip",
+                      text = "Detail Clip",
                       color = Color.White,
                       style = MaterialTheme.typography.headlineSmall,
                       fontWeight = FontWeight.Bold
                   )
 
-                  Spacer(Modifier.height(15.dp))
+                  Spacer(
+                      modifier = Modifier.height(15.dp)
+                  )
 
                   Box(
-                      Modifier
+                      modifier = Modifier
                           .fillMaxWidth()
                           .height(320.dp)
                           .background(
-                              Color(0xFF1B1E2B),
-                              RoundedCornerShape(18.dp)
+                              color = Color(0xFF1B1E2B),
+                              shape = RoundedCornerShape(18.dp)
                           )
                   ) {
+
                       Column(
-                          Modifier
+                          modifier = Modifier
                               .fillMaxSize()
                               .padding(20.dp),
                           verticalArrangement = Arrangement.Center
                       ) {
+
                           Text(
-                              "▶",
+                              text = "▶",
                               color = Color.White,
                               style = MaterialTheme.typography.displayMedium
                           )
 
                           Text(
-                              "PREVIEW 9:16",
+                              text = "PREVIEW 9:16",
                               color = Muted
                           )
                       }
                   }
 
-                  Spacer(Modifier.height(18.dp))
+                  Spacer(
+                      modifier = Modifier.height(18.dp)
+                  )
 
                   Text(
-                      "94/100 • VERY HIGH",
+                      text = "94/100 • VERY HIGH",
                       color = Color(0xFFA78BFA),
                       fontWeight = FontWeight.Bold
                   )
 
                   Text(
-                      "Momen ini berpotensi menjadi clip viral.",
+                      text = "Momen ini berpotensi menjadi clip viral.",
                       color = Color.White,
                       style = MaterialTheme.typography.titleLarge
                   )
 
-                  Spacer(Modifier.height(20.dp))
+                  Spacer(
+                      modifier = Modifier.height(20.dp)
+                  )
 
                   Button(
                       onClick = {},
@@ -347,23 +443,20 @@ workflows:
                           containerColor = Purple
                       )
                   ) {
-                      Text("Simpan ke Galeri")
+
+                      Text(
+                          text = "Simpan ke Galeri"
+                      )
                   }
 
                   OutlinedButton(
                       onClick = back,
                       modifier = Modifier.fillMaxWidth()
                   ) {
-                      Text("Kembali")
-                  }
-              }
-          }
 
-          class MainActivity : ComponentActivity() {
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  setContent {
-                      App()
+                      Text(
+                          text = "Kembali"
+                      )
                   }
               }
           }
@@ -371,15 +464,15 @@ workflows:
 
       - name: Install Gradle
         script: |
-          curl -L https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
+          curl -L https://services.gradle.org/distributions/gradle-8.7-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
-          export PATH="/tmp/gradle-8.9/bin:$PATH"
+          export PATH="/tmp/gradle-8.7/bin:$PATH"
           gradle --version
 
       - name: Build APK
         script: |
-          export PATH="/tmp/gradle-8.9/bin:$PATH"
-          gradle assembleDebug --stacktrace --info
+          export PATH="/tmp/gradle-8.7/bin:$PATH"
+          gradle assembleDebug --stacktrace
 
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
